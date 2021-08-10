@@ -1,9 +1,11 @@
 #!/bin/sh
 set -e
 apt-get update
-#install cmake and git
+# install cmake and git
 apt-get install -y cmake git
-#install lua
+# install shellcheck
+apt-get install shellcheck
+# install lua
 apt-get install -y lua5.1 liblua5.1-0-dev luarocks
 #install json-c
 git clone https://github.com/json-c/json-c.git --depth=1

@@ -53,7 +53,7 @@ collect_data(){
                                         -p daemon.info
   until [ "$n" -ge 5 ]
   do
-    echo "$(/usr/sbin/netjson_monitoring "$MONITORED_INTERFACES")" && break
+    /usr/sbin/netjson_monitoring "$MONITORED_INTERFACES" && break
     
     if [ "$n" -eq 5 ]; then
       [ "$verbose_mode" -eq "1" ] && logger -s "Collecting data failed!" \
@@ -88,6 +88,7 @@ set_url_and_curl(){
 
   URL="$BASE_URL/api/v1/monitoring/device/$UUID/?key=$KEY"
 
+  # shellcheck disable=SC1083
   CURL_COMMAND="curl -s -w "%{http_code}""
   [ "$VERIFY_SSL" -eq "0" ] && CURL_COMMAND="$CURL_COMMAND -k"
   [ "$verbose_mode" -eq "1" ] && CURL_COMMAND="$CURL_COMMAND -v"
@@ -178,6 +179,7 @@ send_data() {
           rm "$file"
           break
         else
+          # shellcheck disable=SC2039
           TIME=$((BASE_SECONDS * 2 **(failures)))
           [ "$verbose_mode" -eq "1" ] && logger -s "Data not sent successfully. Retrying in $TIME seconds" \
                                                 -p daemon.err

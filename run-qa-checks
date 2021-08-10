@@ -3,6 +3,9 @@ set -e
 
 luacheck ./openwrt-openwisp-monitoring/ -a
 
+shellcheck ./openwrt-openwisp-monitoring/files/monitoring.init
+shellcheck ./openwrt-openwisp-monitoring/files/monitoring.agent
+
 openwisp-qa-check \
 	--skip-checkmigrations \
 	--skip-isort \
