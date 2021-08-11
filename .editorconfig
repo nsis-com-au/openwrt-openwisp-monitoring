@@ -5,9 +5,3 @@ indent_size = 2
 binary_next_line   = true  # like -bn
 switch_case_indent = true  # like -ci
 keep_padding       = true  # like -kp
-
-[install-dev.sh]
-keep_padding       = false  # like -kp
-
-[*.init, *.config]
-shell_variant      = posix # like -ln=posix
