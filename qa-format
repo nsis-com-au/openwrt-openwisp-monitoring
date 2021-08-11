@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+shfmt -w -l .
+shfmt -w -l openwrt-openwisp-monitoring/files/monitoring.config
+shfmt -w -l openwrt-openwisp-monitoring/files/monitoring.init

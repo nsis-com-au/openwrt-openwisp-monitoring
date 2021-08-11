@@ -1,6 +1,9 @@
 #!/bin/sh
+#
+# OpenWISP Monitoring Daemon
 
-VERSION=0 # default value of version 
+VERSION=0 # default value of version
+# parse options
 while [ -n "$1" ]; do
   case "$1" in
     --version|-v) export VERSION=1; break;;
@@ -33,10 +36,10 @@ INTERVAL=${INTERVAL:-300}
 verbose_mode=${verbose_mode:-0}
 TMP_DIR="/tmp/openwisp/monitoring"
 
-check_available_memory(){
+check_available_memory() {
   total=$(ubus call system info | jsonfilter -e '@.memory.total')
   available=$(ubus call system info | jsonfilter -e '@.memory.available')
-  required=$(echo - |awk -v percent="$REQUIRED_PERCENT" -v total="$total" '{printf("%.f",percent*total)}')
+  required=$(echo - | awk -v percent="$REQUIRED_PERCENT" -v total="$total" '{printf("%.f",percent*total)}')
 
   if [ "$available" -ge "$required" ]; then
     echo "1"
@@ -47,24 +50,23 @@ check_available_memory(){
   fi
 }
 
-collect_data(){
+collect_data() {
   n=0
   [ "$verbose_mode" -eq "1" ] && logger -s "Collecting NetJSON Monitoring data" \
                                         -p daemon.info
-  until [ "$n" -ge 5 ]
-  do
+  until [ "$n" -ge 5 ]; do
     /usr/sbin/netjson_monitoring "$MONITORED_INTERFACES" && break
-    
+
     if [ "$n" -eq 5 ]; then
       [ "$verbose_mode" -eq "1" ] && logger -s "Collecting data failed!" \
                                             -p daemon.err
     fi
-    n=$((n+1))
+    n=$((n + 1))
     sleep 5
   done
 }
 
-set_url_and_curl(){
+set_url_and_curl() {
   if [ -z "$BASE_URL" ]; then
     logger -s "missing required --url option" \
            -t openwisp_monitoring \
@@ -96,21 +98,20 @@ set_url_and_curl(){
 }
 
 save_data() {
-  while true
-  do
+  while true; do
     memory_available="$(check_available_memory)"
     if [ "$memory_available" -ne "0" ]; then
       data="$(collect_data)"
       # extra zeroes are added for nanoseconds precision
       file_name="$(date -u +'%d-%m-%Y_%H:%M:%S').000000.json"
-      # make directory 
+      # make directory
       mkdir -p "$TMP_DIR"
-      # save data with file_name 
-      echo "$data" > "$TMP_DIR/$file_name"
+      # save data with file_name
+      echo "$data" >"$TMP_DIR/$file_name"
       [ "$verbose_mode" -eq "1" ] && logger -s "Data saved temporarily" \
                                             -p daemon.info
     fi
-    # get process id of the process sending data 
+    # get process id of the process sending data
     pid=$(pgrep -f "openwisp_monitoring.*uuid")
     kill -SIGUSR1 "$pid"
     sleep "$INTERVAL"
@@ -129,16 +130,15 @@ handle_sigusr1() {
 }
 
 send_data() {
-  while true
-  do
-    for file in "$TMP_DIR"/*.json
-    do
+  while true; do
+    for file in "$TMP_DIR"/*.json; do
       if [ ! -f "$file" ]; then
         [ "$verbose_mode" -eq "1" ] && logger -s "No data file found to send." \
                                               -p daemon.info
         trap handle_sigusr1 USR1
         # SIGUSR1 signal received interrupt sleep and continue sending data
-        sleep "$INTERVAL" & wait $!
+        sleep "$INTERVAL" &
+                            wait $!
         trap "" USR1
         continue
       fi
@@ -150,8 +150,7 @@ send_data() {
       BASE_SECONDS=1
       # check if the data is latest or old one
       [ "$(echo "$TMP_DIR"/*.json | awk '{print $2}')" ] || url="$url&current=true"
-      while true
-      do
+      while true; do
         if [ "$failures" -eq "$MAX_RETRIES" ]; then
           if [ "$verbose_mode" = "1" ]; then
             logger -s "Data not sent successfully. Response code is $response_code" \
@@ -175,15 +174,15 @@ send_data() {
         if [ "$response_code" = "200" ]; then
           [ "$verbose_mode" -eq "1" ] && logger -s "Data sent successfully." \
                                                 -p daemon.info
-          #remove saved data 
+          #remove saved data
           rm "$file"
           break
         else
           # shellcheck disable=SC2039
-          TIME=$((BASE_SECONDS * 2 **(failures)))
+          TIME=$((BASE_SECONDS * 2 ** (failures)))
           [ "$verbose_mode" -eq "1" ] && logger -s "Data not sent successfully. Retrying in $TIME seconds" \
                                                 -p daemon.err
-          failures=$((failures+1))
+          failures=$((failures + 1))
           sleep "$TIME"
         fi
       done
@@ -202,7 +201,7 @@ fi
 
 if [ "$MODE" = "collect" ]; then
   MONITORED_INTERFACES=${MONITORED_INTERFACES:-*}
-  # remove double quotes from interfaces 
+  # remove double quotes from interfaces
   MONITORED_INTERFACES=$(echo "$MONITORED_INTERFACES" | tr -d '"')
   save_data
 elif [ "$MODE" = "send" ]; then

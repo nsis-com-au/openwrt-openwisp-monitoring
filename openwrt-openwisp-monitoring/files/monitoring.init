@@ -1,4 +1,6 @@
 #!/bin/sh /etc/rc.common
+#
+# OpenWISP Monitoring Daemon
 
 # shellcheck disable=SC2034
 START=99
@@ -10,11 +12,11 @@ PROG_NAME="OpenWISP monitoring daemon"
 time_to_seconds() {
   time=$1
 
-  { [ "$time" -ge 1 ] 2>/dev/null && seconds="$time"; } ||
-    { [ "${time%s}" -ge 1 ] 2>/dev/null && seconds="${time%s}"; } ||
-    { [ "${time%m}" -ge 1 ] 2>/dev/null && seconds=$((${time%m} * 60)); } ||
-    { [ "${time%h}" -ge 1 ] 2>/dev/null && seconds=$((${time%h} * 3600)); } ||
-    { [ "${time%d}" -ge 1 ] 2>/dev/null && seconds=$((${time%d} * 86400)); }
+  { [ "$time" -ge 1 ] 2>/dev/null && seconds="$time"; } \
+    || { [ "${time%s}" -ge 1 ] 2>/dev/null && seconds="${time%s}"; } \
+      || { [ "${time%m}" -ge 1 ] 2>/dev/null && seconds=$((${time%m} * 60)); } \
+         || { [ "${time%h}" -ge 1 ] 2>/dev/null && seconds=$((${time%h} * 3600)); } \
+            || { [ "${time%d}" -ge 1 ] 2>/dev/null && seconds=$((${time%d} * 86400)); }
 
   echo $seconds
   unset seconds
