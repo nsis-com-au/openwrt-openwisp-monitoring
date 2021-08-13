@@ -12,7 +12,7 @@ if not ubus then
   error('Failed to connect to ubusd')
 end
 
-local monitoring=require('openwisp.monitoring')
+local monitoring=require('openwisp_monitoring.monitoring')
 
 -- collect system info
 local system_info=ubus:call('system', 'info', {})
