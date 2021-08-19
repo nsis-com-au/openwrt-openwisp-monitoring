@@ -1,5 +1,28 @@
 #!/bin/sh
 
+show_help() {
+  printf "Usage:\n"
+  printf "  openwisp_monitoring [OPTIONS...]\n"
+  printf "\n"
+  printf "Runs OpenWISP Monitoring Agent for collecting and sending data.\n"
+  printf "\n"
+  printf "General options:\n"
+  printf "  --help\t\t\t\t: Show this help text\n"
+  printf "  -v, --version\t\t\t\t: Shows version of the agent.\n"
+  printf "  --mode <send, collect>\t\t: Mode for running Monitoring Agent.\n"
+  printf "Openwisp config options:\n"
+  printf "  --url <server-url>\t\t\t: URL of the OpenWISP server.\n"
+  printf "  --uuid <uuid>\t\t\t\t: UUID of the device.\n"
+  printf "  --key <key>\t\t\t\t: Key for the device.\n"
+  printf "  --verify_ssl <0, 1>\t\t\t: Whether SSL Authentication should be enabled or not.\n"
+  printf "Openwisp Monitoring config options:\n"
+  printf "  --interval <time>\t\t\t: Time in seconds after which data should be sent/collected.\n"
+  printf "  --monitored-interfaces <interfaces>\t: Interfaces that needs to be monitored.\n"
+  printf "  --verbose-mode <0, 1>\t\t\t: Run agent in verbose mode.\n"
+  printf "  --required-memory <0-1>\t\t: Fraction of total memory that should be available to collect data.\n"
+  printf "  --max-retries <max-retries-count>\t: No. of time agent should retry to send data.\n"
+}
+
 echoerr() { echo "$@" 1>&2; }
 
 check_available_memory(){
@@ -159,6 +182,7 @@ main() {
   while [ -n "$1" ]; do
     case "$1" in
       --version|-v) export VERSION=1; break;;
+      --help) show_help; exit;;
       --url) export BASE_URL="$2"; shift;;
       --uuid) export UUID="$2"; shift;;
       --key) export KEY="$2"; shift;;
